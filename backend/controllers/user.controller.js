@@ -9,52 +9,153 @@ import crypto from "crypto";
 /**
  * Create a new user account
  * @route POST /api/v1/users/signup
+ * Browser-safe: No throwing, all errors return JSON responses
  */
-export const createUserAccount = catchAsync(async (req, res) => {
-  const { name, email, password, role = "student" } = req.body;
+export const createUserAccount = async (req, res) => {
+  try {
+    // Safely destructure request body
+    const { name, email, password, role = "student" } = req.body || {};
 
-  // Check if user already exists
-  const existingUser = await User.findOne({ email: email.toLowerCase() });
-  if (existingUser) {
-    throw new AppError("User already exists with this email", 400);
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
+
+    // Validate email format
+    if (typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+    }
+
+    // Validate password length
+    if (typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists with this email",
+      });
+    }
+
+    // Create user (password hashing is handled by the model)
+    const user = await User.create({
+      name,
+      email: email.toLowerCase(),
+      password,
+      role,
+    });
+
+    // Update last active and generate token
+    await user.updateLastActive();
+    generateToken(res, user, "Account created successfully");
+    
+  } catch (error) {
+    // Log error for debugging
+    console.error("Signup error:", error);
+    
+    // Always return JSON response, never throw
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred during signup. Please try again.",
+      ...(process.env.NODE_ENV === "development" && { 
+        error: error.message,
+        stack: error.stack 
+      }),
+    });
   }
-
-  // Create user (password hashing is handled by the model)
-  const user = await User.create({
-    name,
-    email: email.toLowerCase(),
-    password,
-    role,
-  });
-
-  // Update last active and generate token
-  await user.updateLastActive();
-  generateToken(res, user, "Account created successfully");
-});
+};
 
 /**
  * Authenticate user and get token
  * @route POST /api/v1/users/signin
+ * Browser-safe: No throwing, all errors return JSON responses
  */
-export const authenticateUser = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
+export const authenticateUser = async (req, res) => {
+  try {
+    // Safely destructure request body
+    const { email, password } = req.body || {};
 
-  // Find user and check password
-  const user = await User.findOne({ email: email.toLowerCase() }).select(
-    "+password"
-  );
-  if (!user || !(await user.comparePassword(password))) {
-    throw new AppError("Invalid email or password", 401);
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    // Validate email format
+    if (typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+    }
+
+    // Validate password
+    if (typeof password !== 'string' || password.length < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid password",
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await user.comparePassword(password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    // Update last active
+    await user.updateLastActive();
+    
+    // Remove password from response
+    user.password = undefined;
+    
+    // Generate token and send response
+    generateToken(res, user, `Welcome back ${user.name}`);
+    
+  } catch (error) {
+    // Log error for debugging
+    console.error("Signin error:", error);
+    
+    // Always return JSON response, never throw
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred during signin. Please try again.",
+      ...(process.env.NODE_ENV === "development" && { 
+        error: error.message,
+        stack: error.stack 
+      }),
+    });
   }
-
-  // Update last active and generate token
-  await user.updateLastActive();
-  
-  // Remove password from response
-  user.password = undefined;
-  
-  generateToken(res, user, `Welcome back ${user.name}`);
-});
+};
 
 /**
  * Sign out user and clear cookie
