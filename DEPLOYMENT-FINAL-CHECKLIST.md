@@ -13,6 +13,9 @@ Your LMS application is now **production-ready** with all authentication and API
 - ✅ Enhanced CORS with multiple origin support
 - ✅ Proper cookie clearing on logout/delete
 - ✅ Environment-based configuration
+- ✅ Trust proxy enabled for Render (`app.set("trust proxy", 1)`)
+- ✅ Rate limiter skips OPTIONS requests
+- ✅ CORS preflight handling
 
 ### 2. Frontend (Vercel) ✅
 - ✅ Correct use of `import.meta.env.VITE_BACKEND_URL`
@@ -216,9 +219,13 @@ VITE_BACKEND_URL=https://your-backend.onrender.com
 
 **Solutions:**
 1. ✅ Verify `NODE_ENV=production` on Render (enables secure cookies)
-2. ✅ Check cookie flags in DevTools (should have Secure and SameSite=None)
-3. ✅ Ensure both sites use HTTPS
-4. ✅ Verify `credentials: 'include'` in frontend (already configured)
+2. ✅ Verify trust proxy is enabled: `app.set("trust proxy", 1)` (critical for Render)
+3. ✅ Check cookie flags in DevTools (should have Secure and SameSite=None)
+4. ✅ Ensure both sites use HTTPS
+5. ✅ Verify `credentials: 'include'` in frontend (already configured)
+
+**Why Trust Proxy Matters:**
+Without `app.set("trust proxy", 1)`, Express cannot detect HTTPS on Render (sees HTTP instead), causing secure cookies to fail. This is the most common cause of cookie issues on Render.
 
 ### Issue: Environment Variable Not Loading
 
@@ -292,7 +299,10 @@ When everything is working correctly, you should see:
 
 - **Backend Setup**: `backend/RENDER-DEPLOYMENT.md`
 - **Frontend Setup**: `frontend/PRODUCTION-SETUP.md`
+- **Trust Proxy Fix**: `TRUST-PROXY-FIX.md`
 - **CORS Fix**: `CORS-AUTH-FIX-SUMMARY.md`
+- **CORS Preflight**: `CORS-PREFLIGHT-FIX.md`
+- **Rate Limiter**: `RATE-LIMITER-VERIFICATION.md`
 - **API Verification**: `FRONTEND-API-VERIFICATION.md`
 - **Environment Variables**: `ENV-VARIABLE-CONSISTENCY-SUMMARY.md`
 
@@ -305,6 +315,8 @@ Your application is **production-ready** with:
 ✅ Secure authentication (httpOnly, secure, sameSite cookies)
 ✅ Cross-origin support (Vercel ↔ Render)
 ✅ Proper CORS configuration
+✅ Trust proxy enabled for Render deployment
+✅ Rate limiter with OPTIONS bypass
 ✅ Environment-based configuration
 ✅ Debug logging for troubleshooting
 ✅ Comprehensive error handling
