@@ -12,11 +12,12 @@ export const AuthProvider = ({ children }) => {
         const checkAuth = async () => {
             try {
                 const response = await authService.getProfile();
-                if (response.success) {
-                    setUser(response.data);
+                // Handle new response format: { ok, status, data }
+                if (response.ok && response.data.success) {
+                    setUser(response.data.data);
                 }
             } catch (error) {
-                // 401 or network error - assume not logged in
+                // Should not happen with non-throwing API, but keep for safety
                 console.log('Session check failed (not logged in)');
                 setUser(null);
             } finally {
@@ -28,41 +29,43 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        try {
-            const response = await authService.signin({ email, password });
-            if (response.success) {
-                // Backend now returns full user object with role
-                setUser(response.user);
-                return { success: true };
-            }
-            return { success: false, message: response.message };
-        } catch (error) {
-            return { success: false, message: error.message || 'Login failed' };
+        const response = await authService.signin({ email, password });
+        
+        // Handle new response format: { ok, status, data }
+        if (response.ok && response.data.success) {
+            // Backend returns full user object
+            setUser(response.data.user);
+            return { success: true };
         }
+        
+        // Handle error response
+        return { 
+            success: false, 
+            message: response.data.message || 'Login failed' 
+        };
     };
 
     const signup = async (name, email, password, role) => {
-        try {
-            const response = await authService.signup({ name, email, password, role });
-            if (response.success) {
-                // Backend now returns full user object with role
-                setUser(response.user);
-                return { success: true };
-            }
-            return { success: false, message: response.message };
-        } catch (error) {
-            return { success: false, message: error.message || 'Signup failed' };
+        const response = await authService.signup({ name, email, password, role });
+        
+        // Handle new response format: { ok, status, data }
+        if (response.ok && response.data.success) {
+            // Backend returns full user object
+            setUser(response.data.user);
+            return { success: true };
         }
+        
+        // Handle error response
+        return { 
+            success: false, 
+            message: response.data.message || 'Signup failed' 
+        };
     };
 
     const logout = async () => {
-        try {
-            await authService.signout();
-        } catch (error) {
-            console.error('Logout error', error);
-        } finally {
-            setUser(null);
-        }
+        const response = await authService.signout();
+        // Always clear user, even if request fails
+        setUser(null);
     };
 
     const value = {
@@ -75,10 +78,11 @@ export const AuthProvider = ({ children }) => {
         signup,
         logout,
         refreshProfile: async () => {
-            try {
-                const res = await authService.getProfile();
-                if (res.success) setUser(res.data);
-            } catch (e) { /* ignore */ }
+            const response = await authService.getProfile();
+            // Handle new response format: { ok, status, data }
+            if (response.ok && response.data.success) {
+                setUser(response.data.data);
+            }
         }
     };
 

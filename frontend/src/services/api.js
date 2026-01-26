@@ -31,7 +31,8 @@ if (!API_URL || API_URL === 'undefined' || API_URL === 'null') {
 
 const api = {
     /**
-     * Generic request handler
+     * Generic request handler - Browser-safe, non-throwing
+     * Always returns: { ok: boolean, status: number, data: any }
      */
     request: async (endpoint, options = {}) => {
         const defaultHeaders = {
@@ -62,24 +63,35 @@ const api = {
             }
             
             const response = await fetch(fullURL, config);
-
-            // Handle 401 Unauthorized globally (e.g., redirect to login)
-            if (response.status === 401) {
-                // You might want to trigger a global event or callback here
-                // For now, we propagate the error so the caller handles it
-            }
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw {
-                    status: response.status,
-                    message: data.message || 'Something went wrong',
-                    data: data
+            
+            // Parse JSON response
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                // If JSON parsing fails, return text or empty object
+                data = {
+                    message: 'Invalid JSON response from server',
+                    status: response.status
                 };
             }
 
-            return data;
+            // Debug: Log response in development
+            if (import.meta.env.DEV) {
+                console.log('📥 API Response:', {
+                    status: response.status,
+                    ok: response.ok,
+                    data
+                });
+            }
+
+            // Always return structured response (never throw)
+            return {
+                ok: response.ok,
+                status: response.status,
+                data
+            };
+
         } catch (error) {
             // Enhanced error logging
             console.error('❌ API Request Failed:', {
@@ -89,8 +101,15 @@ const api = {
                 fullError: error
             });
             
-            // Re-throw formatted error
-            throw error.message ? error : { message: 'Network error', status: 500 };
+            // Return error response (never throw)
+            return {
+                ok: false,
+                status: 0,
+                data: {
+                    message: error.message || 'Network error',
+                    error: error.name || 'NetworkError'
+                }
+            };
         }
     },
 
