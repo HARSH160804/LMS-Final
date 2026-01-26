@@ -26,6 +26,14 @@ await connectDB();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+// Trust proxy - Required for Render deployment
+// Enables Express to trust the X-Forwarded-* headers from Render's reverse proxy
+// This is critical for:
+// - Proper HTTPS detection (req.protocol will be 'https')
+// - Secure cookie handling (cookies with secure: true will work)
+// - Correct client IP detection
+app.set("trust proxy", 1);
+
 // CORS Configuration - MUST be first
 const allowedOrigins = process.env.CLIENT_URL 
   ? process.env.CLIENT_URL.split(',').map(url => url.trim())
