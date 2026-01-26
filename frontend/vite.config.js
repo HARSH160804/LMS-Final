@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     // Proxy configuration for local development only
-    // In production, API calls use VITE_API_URL environment variable
+    // In production, API calls use VITE_BACKEND_URL environment variable
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

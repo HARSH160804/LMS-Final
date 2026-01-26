@@ -23,7 +23,7 @@ This frontend is configured for seamless deployment on [Vercel](https://vercel.c
 
     | Name | Value | Description |
     |------|-------|-------------|
-    | `VITE_API_URL` | `https://your-backend-url.com` | Base URL of your backend. |
+    | `VITE_BACKEND_URL` | `https://your-backend-url.com` | Base URL of your backend. |
 
 4.  **Deploy**: Click Deploy.
 

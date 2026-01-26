@@ -32,7 +32,7 @@ Your frontend has been **successfully configured** for production deployment on 
 
 ```
 frontend/src/services/
-├── api.js              ✅ Centralized API with VITE_API_URL
+├── api.js              ✅ Centralized API with VITE_BACKEND_URL
 ├── auth.service.js     ✅ Uses api.js
 ├── course.service.js   ✅ Uses api.js
 ├── progress.service.js ✅ Uses api.js
@@ -41,7 +41,7 @@ frontend/src/services/
 
 **Key Configuration** (`api.js`):
 ```javascript
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 const BASE_URL = `${API_URL}/api/v1`;
 
 const config = {
@@ -77,7 +77,7 @@ Install Command: npm install
 In Vercel Project Settings → Environment Variables:
 
 ```
-Variable Name: VITE_API_URL
+Variable Name: VITE_BACKEND_URL
 Value: https://your-backend.onrender.com
 ```
 
@@ -93,7 +93,7 @@ Click "Deploy" and wait for build to complete
 ## 🔐 Security Checklist
 
 - ✅ **No secrets in code** - All sensitive data in environment variables
-- ✅ **No hardcoded URLs** - Backend URL from `VITE_API_URL`
+- ✅ **No hardcoded URLs** - Backend URL from `VITE_BACKEND_URL`
 - ✅ **Credentials included** - Cookies sent with cross-origin requests
 - ✅ **Environment files gitignored** - `.env` files not committed to GitHub
 - ✅ **CORS handled by backend** - No frontend CORS workarounds needed
@@ -105,14 +105,14 @@ Click "Deploy" and wait for build to complete
 ### Local Development
 ```
 Frontend (localhost:5173)
-    ↓ VITE_API_URL=http://localhost:8000
+    ↓ VITE_BACKEND_URL=http://localhost:8000
 Backend (localhost:8000)
 ```
 
 ### Production
 ```
 Frontend (Vercel: your-app.vercel.app)
-    ↓ VITE_API_URL=https://your-backend.onrender.com
+    ↓ VITE_BACKEND_URL=https://your-backend.onrender.com
 Backend (Render: your-backend.onrender.com)
 ```
 
@@ -123,7 +123,7 @@ Backend (Render: your-backend.onrender.com)
 Your frontend was **already well-architected** for production:
 
 1. ✅ **Centralized API service** - All API calls go through `api.js`
-2. ✅ **Environment variable support** - Uses `VITE_API_URL`
+2. ✅ **Environment variable support** - Uses `VITE_BACKEND_URL`
 3. ✅ **Proper credentials** - `credentials: 'include'` configured
 4. ✅ **Service layer pattern** - Clean separation of concerns
 5. ✅ **No hardcoded URLs** - All services use centralized API
@@ -142,7 +142,7 @@ Your frontend was **already well-architected** for production:
 ### Test Locally with Production Backend
 Create `frontend/.env.local`:
 ```env
-VITE_API_URL=https://your-backend.onrender.com
+VITE_BACKEND_URL=https://your-backend.onrender.com
 ```
 
 Run:
@@ -177,7 +177,7 @@ After deploying to Vercel:
 **Symptom**: "Access-Control-Allow-Origin" errors
 
 **Solution**:
-1. Verify `VITE_API_URL` in Vercel matches your Render URL
+1. Verify `VITE_BACKEND_URL` in Vercel matches your Render URL
 2. Update backend `CLIENT_URL` to your Vercel domain
 3. Ensure backend CORS includes your Vercel domain
 
@@ -193,7 +193,7 @@ After deploying to Vercel:
 **Symptom**: API calls returning 404
 
 **Solution**:
-1. Verify `VITE_API_URL` is set in Vercel
+1. Verify `VITE_BACKEND_URL` is set in Vercel
 2. Test backend health: `https://your-backend.onrender.com/api/health`
 3. Check backend is deployed and running
 
@@ -203,7 +203,7 @@ After deploying to Vercel:
 
 | Variable | Value | Example |
 |----------|-------|---------|
-| `VITE_API_URL` | Your Render backend URL | `https://lms-backend-xyz.onrender.com` |
+| `VITE_BACKEND_URL` | Your Render backend URL | `https://lms-backend-xyz.onrender.com` |
 
 **Note**: Do NOT include trailing slash in the URL
 
@@ -213,7 +213,7 @@ After deploying to Vercel:
 
 After deploying to Vercel:
 
-- [ ] Verify `VITE_API_URL` is set in Vercel environment variables
+- [ ] Verify `VITE_BACKEND_URL` is set in Vercel environment variables
 - [ ] Update backend `CLIENT_URL` to your Vercel domain
 - [ ] Test authentication (sign up, sign in, logout)
 - [ ] Test course browsing and details
@@ -258,7 +258,7 @@ Your frontend is **production-ready** and configured to work with your deployed 
 
 **Next Steps**:
 1. Deploy backend to Render (if not done)
-2. Deploy frontend to Vercel with `VITE_API_URL` set
+2. Deploy frontend to Vercel with `VITE_BACKEND_URL` set
 3. Update backend `CLIENT_URL` to Vercel domain
 4. Test end-to-end functionality
 

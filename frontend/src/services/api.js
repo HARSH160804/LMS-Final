@@ -2,16 +2,16 @@
  * API Service - Centralized API communication
  * 
  * Configuration:
- * - Uses VITE_API_URL environment variable for backend URL
+ * - Uses VITE_BACKEND_URL environment variable for backend URL
  * - Fallback to http://localhost:8000 for local development
  * - All requests include credentials (cookies) for authentication
  * 
  * Production Setup:
- * - Set VITE_API_URL in Vercel environment variables
- * - Example: VITE_API_URL=https://your-backend.onrender.com
+ * - Set VITE_BACKEND_URL in Vercel environment variables
+ * - Example: VITE_BACKEND_URL=https://your-backend.onrender.com
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 const BASE_URL = `${API_URL}/api/v1`;
 
 const api = {

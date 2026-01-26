@@ -10,7 +10,7 @@ Your frontend is **production-ready** and correctly configured to communicate wi
 
 ### API Communication
 - ✅ **Centralized API service** - All API calls go through `src/services/api.js`
-- ✅ **Environment variable** - Uses `VITE_API_URL` for backend URL
+- ✅ **Environment variable** - Uses `VITE_BACKEND_URL` for backend URL
 - ✅ **Credentials included** - `credentials: 'include'` for cookie-based auth
 - ✅ **No hardcoded URLs** - All services use the centralized API
 - ✅ **Fallback configured** - Defaults to `http://localhost:8000` for local dev
@@ -31,7 +31,7 @@ All API calls are properly abstracted through service files:
 Set this in your Vercel project settings:
 
 ```
-VITE_API_URL=https://your-backend.onrender.com
+VITE_BACKEND_URL=https://your-backend.onrender.com
 ```
 
 **Important**: Replace `https://your-backend.onrender.com` with your actual Render backend URL.
@@ -52,7 +52,7 @@ VITE_API_URL=https://your-backend.onrender.com
 
 3. **Add Environment Variable**
    - Go to Project Settings → Environment Variables
-   - Add: `VITE_API_URL` = `https://your-backend.onrender.com`
+   - Add: `VITE_BACKEND_URL` = `https://your-backend.onrender.com`
    - Apply to: Production, Preview, and Development
 
 4. **Deploy**
@@ -66,12 +66,12 @@ VITE_API_URL=https://your-backend.onrender.com
 ### API Service (`src/services/api.js`)
 
 ```javascript
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 const BASE_URL = `${API_URL}/api/v1`;
 ```
 
 - **Local Development**: Uses `http://localhost:8000` (fallback)
-- **Production**: Uses `VITE_API_URL` from Vercel environment variables
+- **Production**: Uses `VITE_BACKEND_URL` from Vercel environment variables
 
 ### Request Configuration
 
@@ -95,7 +95,7 @@ const config = {
 Create a `.env.local` file in the `frontend/` folder:
 
 ```env
-VITE_API_URL=https://your-backend.onrender.com
+VITE_BACKEND_URL=https://your-backend.onrender.com
 ```
 
 Then run:
@@ -141,21 +141,21 @@ After deploying to Vercel:
 ### `.env.example` (Committed)
 Template showing required environment variables:
 ```env
-VITE_API_URL=http://localhost:8000
+VITE_BACKEND_URL=http://localhost:8000
 ```
 
 ### `.env.local` (Not Committed)
 Your local development overrides:
 ```env
-VITE_API_URL=http://localhost:8000
+VITE_BACKEND_URL=http://localhost:8000
 # or for testing with production backend:
-# VITE_API_URL=https://your-backend.onrender.com
+# VITE_BACKEND_URL=https://your-backend.onrender.com
 ```
 
 ### Vercel Environment Variables (Production)
 Set in Vercel dashboard:
 ```
-VITE_API_URL=https://your-backend.onrender.com
+VITE_BACKEND_URL=https://your-backend.onrender.com
 ```
 
 ---
@@ -166,7 +166,7 @@ VITE_API_URL=https://your-backend.onrender.com
 **Symptom**: "Access-Control-Allow-Origin" errors in browser console
 
 **Solution**: 
-1. Verify `VITE_API_URL` is set correctly in Vercel
+1. Verify `VITE_BACKEND_URL` is set correctly in Vercel
 2. Ensure backend CORS includes your Vercel domain
 3. Check backend `CLIENT_URL` environment variable
 
@@ -182,7 +182,7 @@ VITE_API_URL=https://your-backend.onrender.com
 **Symptom**: 404 errors, network errors
 
 **Solution**:
-1. Check `VITE_API_URL` in Vercel environment variables
+1. Check `VITE_BACKEND_URL` in Vercel environment variables
 2. Verify backend is deployed and running on Render
 3. Test backend health endpoint: `https://your-backend.onrender.com/api/health`
 
@@ -206,7 +206,7 @@ VITE_API_URL=https://your-backend.onrender.com
    - Get your backend URL (e.g., `https://your-app.onrender.com`)
 
 2. **Deploy Frontend on Vercel**
-   - Set `VITE_API_URL` to your Render backend URL
+   - Set `VITE_BACKEND_URL` to your Render backend URL
    - Deploy and test
 
 3. **Update Backend CORS**
