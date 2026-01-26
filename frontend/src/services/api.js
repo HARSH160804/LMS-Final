@@ -93,7 +93,8 @@ const api = {
             };
 
         } catch (error) {
-            // Enhanced error logging
+            // CRITICAL: Always log error but NEVER return console.error()
+            // console.error() returns undefined which breaks calling code
             console.error('❌ API Request Failed:', {
                 endpoint,
                 baseURL: BASE_URL,
@@ -101,12 +102,13 @@ const api = {
                 fullError: error
             });
             
-            // Return error response (never throw)
+            // CRITICAL: Always return structured response object
+            // This ensures res.ok checks work correctly in calling code
             return {
                 ok: false,
                 status: 0,
                 data: {
-                    message: error.message || 'Network error',
+                    message: error.message || 'Network error or request blocked by browser',
                     error: error.name || 'NetworkError'
                 }
             };
