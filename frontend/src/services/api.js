@@ -14,6 +14,21 @@
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 const BASE_URL = `${API_URL}/api/v1`;
 
+// Debug: Log the configuration (only in development)
+if (import.meta.env.DEV) {
+    console.log('🔧 API Configuration:', {
+        VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+        API_URL,
+        BASE_URL
+    });
+}
+
+// Validate that API_URL is properly set
+if (!API_URL || API_URL === 'undefined' || API_URL === 'null') {
+    console.error('❌ VITE_BACKEND_URL is not set! API calls will fail.');
+    console.error('Please set VITE_BACKEND_URL in your environment variables.');
+}
+
 const api = {
     /**
      * Generic request handler
@@ -35,7 +50,18 @@ const api = {
         }
 
         try {
-            const response = await fetch(`${BASE_URL}${endpoint}`, config);
+            const fullURL = `${BASE_URL}${endpoint}`;
+            
+            // Debug: Log request in development
+            if (import.meta.env.DEV) {
+                console.log('🌐 API Request:', {
+                    method: config.method || 'GET',
+                    url: fullURL,
+                    hasCredentials: config.credentials === 'include'
+                });
+            }
+            
+            const response = await fetch(fullURL, config);
 
             // Handle 401 Unauthorized globally (e.g., redirect to login)
             if (response.status === 401) {
@@ -55,6 +81,14 @@ const api = {
 
             return data;
         } catch (error) {
+            // Enhanced error logging
+            console.error('❌ API Request Failed:', {
+                endpoint,
+                baseURL: BASE_URL,
+                error: error.message || error,
+                fullError: error
+            });
+            
             // Re-throw formatted error
             throw error.message ? error : { message: 'Network error', status: 500 };
         }
