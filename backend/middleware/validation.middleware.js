@@ -3,6 +3,11 @@ import { AppError } from './error.middleware.js';
 
 export const validate = (validations) => {
     return async (req, res, next) => {
+        // Skip validation for OPTIONS preflight requests
+        if (req.method === "OPTIONS") {
+            return next();
+        }
+
         // Run all validations
         await Promise.all(validations.map(validation => validation.run(req)));
 

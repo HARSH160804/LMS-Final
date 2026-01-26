@@ -68,6 +68,15 @@ app.use(
 // Handle preflight requests for all routes
 app.options("*", cors());
 
+// Global OPTIONS short-circuit - CRITICAL for preflight
+// OPTIONS requests must NEVER reach auth, validation, or business logic
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Logging Middleware (before other middleware for better debugging)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
