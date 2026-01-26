@@ -61,7 +61,15 @@ export const authenticateUser = catchAsync(async (req, res) => {
  * @route POST /api/v1/users/signout
  */
 export const signOutUser = catchAsync(async (_, res) => {
-  res.cookie("token", "", { maxAge: 0 });
+  // Clear cookie with same settings as when it was set
+  const cookieOptions = {
+    httpOnly: true,
+    maxAge: 0,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production",
+  };
+  
+  res.cookie("token", "", cookieOptions);
   res.status(200).json({
     success: true,
     message: "Signed out successfully",
@@ -230,7 +238,15 @@ export const deleteUserAccount = catchAsync(async (req, res) => {
   // Delete user
   await User.findByIdAndDelete(req.id);
 
-  res.cookie("token", "", { maxAge: 0 });
+  // Clear cookie with same settings as when it was set
+  const cookieOptions = {
+    httpOnly: true,
+    maxAge: 0,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production",
+  };
+  
+  res.cookie("token", "", cookieOptions);
   res.status(200).json({
     success: true,
     message: "Account deleted successfully",
