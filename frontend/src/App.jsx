@@ -25,6 +25,9 @@ import CreateCourse from './pages/instructor/CreateCourse';
 import ManageCourse from './pages/instructor/ManageCourse';
 import ManageLectures from './pages/instructor/ManageLectures';
 
+// ⚠️ TEMPORARY DEBUG PAGE - DELETE AFTER DEBUGGING
+import DebugFetch from './pages/DebugFetch';
+
 function App() {
   return (
     <AuthProvider>
@@ -67,6 +70,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Route>
+
+        {/* ⚠️ TEMPORARY DEBUG ROUTE - DELETE AFTER DEBUGGING */}
+        <Route path="/debug-fetch" element={<DebugFetch />} />
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
