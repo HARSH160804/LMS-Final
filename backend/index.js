@@ -34,7 +34,51 @@ const PORT = process.env.PORT || 8000;
 // - Correct client IP detection
 app.set("trust proxy", 1);
 
-// CORS Configuration - MUST be first
+// ============================================================================
+// GLOBAL CORS + OPTIONS SHORT-CIRCUIT - MUST BE FIRST MIDDLEWARE
+// ============================================================================
+// This middleware MUST run before cors(), body parsers, auth, rate-limit, etc.
+// It manually sets CORS headers and immediately returns 204 for OPTIONS requests.
+// 
+// Why this is required:
+// 1. Browser preflight OPTIONS requests MUST get 204 response immediately
+// 2. CORS headers MUST be present on OPTIONS responses
+// 3. OPTIONS requests MUST NOT reach auth, validation, or rate-limit middleware
+// 4. cors() middleware alone is insufficient for complex scenarios
+// 5. Render/Cloudflare proxy requires explicit header handling
+//
+// This fixes: "No 'Access-Control-Allow-Origin' header present" errors
+// ============================================================================
+app.use((req, res, next) => {
+  // Hardcoded Vercel frontend origin (replace with your actual Vercel URL)
+  const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+  
+  // Set CORS headers for ALL requests (not just OPTIONS)
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+  
+  // Debug log for OPTIONS requests (remove after debugging)
+  if (req.method === "OPTIONS") {
+    console.log("🔍 OPTIONS Request:", {
+      method: req.method,
+      origin: req.headers.origin,
+      path: req.path,
+      headers: req.headers
+    });
+  }
+  
+  // If this is an OPTIONS request, return 204 immediately and STOP
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+  
+  // For non-OPTIONS requests, continue to next middleware
+  next();
+});
+
+// CORS Configuration - Simplified (global middleware above handles OPTIONS)
 const allowedOrigins = process.env.CLIENT_URL 
   ? process.env.CLIENT_URL.split(',').map(url => url.trim())
   : ["http://localhost:5173"];
@@ -64,18 +108,6 @@ app.use(
     ],
   })
 );
-
-// Handle preflight requests for all routes
-app.options("*", cors());
-
-// Global OPTIONS short-circuit - CRITICAL for preflight
-// OPTIONS requests must NEVER reach auth, validation, or business logic
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
 
 // Logging Middleware (before other middleware for better debugging)
 if (process.env.NODE_ENV === "development") {
