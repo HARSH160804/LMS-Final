@@ -57,29 +57,35 @@ app.use(
   })
 );
 
-// Global rate limiting (increased for development)
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 1000 requests per windowMs
-  message: "Too many requests from this IP, please try again later.",
-});
+// Handle preflight requests for all routes
+app.options("*", cors());
+
+// Logging Middleware (before other middleware for better debugging)
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+
+// Body Parser Middleware (before routes)
+app.use(express.json({ limit: "10kb" })); // Body limit is 10kb
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(cookieParser());
 
 // Security Middleware
 app.use(helmet()); // Set security HTTP headers
 // app.use(mongoSanitize()); // Data sanitization against NoSQL query injection
 // app.use(xss()); // Data sanitization against XSS
 app.use(hpp()); // Prevent HTTP Parameter Pollution
-app.use("/api", limiter); // Apply rate limiting to all routes
 
-// Logging Middleware
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
+// Global rate limiting with OPTIONS bypass
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Limit each IP to 1000 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+  skip: (req) => req.method === "OPTIONS", // Skip rate limiting for preflight requests
+});
 
-// Body Parser Middleware
-app.use(express.json({ limit: "10kb" })); // Body limit is 10kb
-app.use(express.urlencoded({ extended: true, limit: "10kb" }));
-app.use(cookieParser());
+// Apply rate limiting to API routes (OPTIONS already bypassed)
+app.use("/api", limiter);
 
 // API Routes
 app.use("/api/v1/media", mediaRoute);
