@@ -27,19 +27,21 @@ const CourseDetail = () => {
         const fetchData = async () => {
             try {
                 const courseRes = await courseService.getCourseDetails(id);
-                if (courseRes.success && courseRes.data) {
-                    setCourse(courseRes.data);
-                    setLectures(courseRes.data.lectures || []);
+                // Handle new API response format: { ok, status, data }
+                if (courseRes.ok && courseRes.data.success && courseRes.data.data) {
+                    setCourse(courseRes.data.data);
+                    setLectures(courseRes.data.data.lectures || []);
                 } else {
-                    setError('Failed to load course details');
+                    setError(courseRes.data.message || 'Failed to load course details');
                     return;
                 }
 
                 if (isAuthenticated) {
                     try {
                         const statusRes = await purchaseService.getPurchaseStatus(id);
-                        if (statusRes.success) {
-                            if (statusRes.purchased || statusRes.data?.status === 'completed') {
+                        // Handle new API response format
+                        if (statusRes.ok && statusRes.data.success) {
+                            if (statusRes.data.purchased || statusRes.data.data?.status === 'completed') {
                                 setStatus('enrolled');
                             }
                         }
@@ -70,19 +72,21 @@ const CourseDetail = () => {
             if (!course.price || course.price === 0) {
                 // Free course enrollment
                 const res = await purchaseService.enrollFree(id);
-                if (res.success) {
+                // Handle new API response format: { ok, status, data }
+                if (res.ok && res.data.success) {
                     setStatus('enrolled');
                     navigate(`/course/${id}/learn`);
                 } else {
-                    alert(res.message || 'Failed to enroll in course');
+                    alert(res.data.message || 'Failed to enroll in course');
                 }
             } else {
                 // Paid course - create Stripe checkout session
                 const res = await purchaseService.createStripeCheckoutSession(id);
-                if (res.success && res.url) {
-                    window.location.href = res.url;
+                // Handle new API response format
+                if (res.ok && res.data.success && res.data.url) {
+                    window.location.href = res.data.url;
                 } else {
-                    alert('Failed to initiate payment. Please try again.');
+                    alert(res.data.message || 'Failed to initiate payment. Please try again.');
                 }
             }
         } catch (err) {
