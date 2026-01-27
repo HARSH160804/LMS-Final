@@ -12,10 +12,11 @@ const Home = () => {
         const fetchCourses = async () => {
             try {
                 const response = await courseService.getPublishedCourses();
-                if (response.success) {
-                    setCourses(response.data || []);
+                // Handle new API response format: { ok, status, data }
+                if (response.ok && response.data.success) {
+                    setCourses(response.data.data || []);
                 } else {
-                    setError('Failed to load courses');
+                    setError(response.data.message || 'Failed to load courses');
                 }
             } catch (err) {
                 setError('Error loading courses');

@@ -286,12 +286,13 @@ const MyCourses = () => {
         const fetchPurchases = async () => {
             try {
                 const response = await purchaseService.getMyPurchasedCourses();
-                if (response.success) {
+                // Handle new API response format: { ok, status, data }
+                if (response.ok && response.data.success) {
                     // Filter out purchases where the course was deleted
-                    const validCourses = response.data.filter(p => p.courseId !== null);
+                    const validCourses = response.data.data.filter(p => p.courseId !== null);
                     setCourses(validCourses);
                 } else {
-                    setError(response.message || 'Failed to fetch courses');
+                    setError(response.data.message || 'Failed to fetch courses');
                 }
             } catch (err) {
                 setError('An error occurred while loading your courses');
