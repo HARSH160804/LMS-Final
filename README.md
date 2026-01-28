@@ -24,7 +24,7 @@ LMS-Final/
 └── README.md         # This file
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Backend - Render
 
@@ -115,7 +115,7 @@ Frontend will run on `http://localhost:5173`
 - **Routing**: React Router v7
 - **Animations**: Framer Motion
 
-## 📚 API Documentation
+## API Documentation
 
 API documentation is available in `backend/API-REFERENCE.md`
 
@@ -126,7 +126,7 @@ API documentation is available in `backend/API-REFERENCE.md`
 - `GET /api/health` - Simple health check
 - `GET /health` - Detailed system status
 
-## 🔐 Security Features
+## Security Features
 
 - JWT-based authentication
 - Password hashing with bcrypt
@@ -137,7 +137,7 @@ API documentation is available in `backend/API-REFERENCE.md`
 - HTTP Parameter Pollution prevention
 - Secure HTTP headers with Helmet
 
-## 📝 License
+## License
 
 ISC
 
