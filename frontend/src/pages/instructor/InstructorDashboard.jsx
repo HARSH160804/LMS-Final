@@ -352,10 +352,11 @@ const InstructorDashboard = () => {
         const fetchCourses = async () => {
             try {
                 const response = await courseService.getMyCreatedCourses();
-                if (response.success) {
-                    setCourses(response.data || []);
+                // Handle new API response format: { ok, status, data }
+                if (response.ok && response.data.success && response.data.data) {
+                    setCourses(response.data.data || []);
                 } else {
-                    setError('Failed to load courses');
+                    setError(response.data?.message || 'Failed to load courses');
                 }
             } catch (err) {
                 setError('Error loading your courses');

@@ -145,9 +145,3 @@ Expected responses:
 ---
 
 ## 📞 Support
-
-If you encounter issues:
-1. Check Render logs for error messages
-2. Verify all environment variables are set correctly
-3. Test health endpoints after deployment
-4. Ensure MongoDB connection string is accessible from Render

@@ -27,12 +27,20 @@ const CourseDetail = () => {
         const fetchData = async () => {
             try {
                 const courseRes = await courseService.getCourseDetails(id);
+                
+                // Debug logging
+                console.log("Course API Response:", courseRes);
+                console.log("courseRes.ok:", courseRes.ok);
+                console.log("courseRes.data:", courseRes.data);
+                
                 // Handle new API response format: { ok, status, data }
                 if (courseRes.ok && courseRes.data.success && courseRes.data.data) {
+                    console.log("✅ Course loaded successfully:", courseRes.data.data.title);
                     setCourse(courseRes.data.data);
                     setLectures(courseRes.data.data.lectures || []);
                 } else {
-                    setError(courseRes.data.message || 'Failed to load course details');
+                    console.error("❌ Course load failed:", courseRes);
+                    setError(courseRes.data?.message || 'Failed to load course details');
                     return;
                 }
 
@@ -47,9 +55,11 @@ const CourseDetail = () => {
                         }
                     } catch (e) {
                         // ignore error
+                        console.log("Purchase status check failed (expected if not purchased)");
                     }
                 }
             } catch (err) {
+                console.error("❌ Error fetching course:", err);
                 setError('An error occurred');
             } finally {
                 setLoading(false);

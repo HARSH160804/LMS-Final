@@ -1,0 +1,37 @@
+version: '3.8'
+
+# Production overrides for docker-compose.yml
+services:
+  backend:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY_BACKEND}:latest
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY_FRONTEND}:latest
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  mongodb:
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

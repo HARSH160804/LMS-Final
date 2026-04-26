@@ -147,19 +147,39 @@ export const getPublishedCourses = catchAsync(async (req, res) => {
 /**
  * Get courses created by the current user
  * @route GET /api/v1/courses/my-courses
+ * Browser-safe: No throwing, all errors return JSON responses
  */
-export const getMyCreatedCourses = catchAsync(async (req, res) => {
-  const courses = await Course.find({ instructor: req.id }).populate({
-    path: "enrolledStudents",
-    select: "name avatar",
-  });
+export const getMyCreatedCourses = async (req, res) => {
+  try {
+    // Validate user ID
+    if (!req.id) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated"
+      });
+    }
+    
+    const courses = await Course.find({ instructor: req.id }).populate({
+      path: "enrolledStudents",
+      select: "name avatar",
+    });
 
-  res.status(200).json({
-    success: true,
-    count: courses.length,
-    data: courses,
-  });
-});
+    return res.status(200).json({
+      success: true,
+      count: courses.length,
+      data: courses,
+    });
+  } catch (error) {
+    console.error("Get my created courses error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching your courses",
+      ...(process.env.NODE_ENV === "development" && { 
+        error: error.message 
+      }),
+    });
+  }
+};
 
 /**
  * Update course details
@@ -213,30 +233,55 @@ export const updateCourseDetails = catchAsync(async (req, res) => {
 /**
  * Get course by ID
  * @route GET /api/v1/courses/:courseId
+ * Browser-safe: No throwing, all errors return JSON responses
  */
-export const getCourseDetails = catchAsync(async (req, res) => {
-  const course = await Course.findById(req.params.courseId)
-    .populate({
-      path: "instructor",
-      select: "name avatar bio",
-    })
-    .populate({
-      path: "lectures",
-      select: "title videoUrl duration isPreview order",
+export const getCourseDetails = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    
+    // Validate courseId
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course ID is required"
+      });
+    }
+    
+    const course = await Course.findById(courseId)
+      .populate({
+        path: "instructor",
+        select: "name avatar bio",
+      })
+      .populate({
+        path: "lectures",
+        select: "title videoUrl duration isPreview order",
+      });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        ...course.toJSON(),
+        averageRating: course.averageRating,
+      },
     });
-
-  if (!course) {
-    throw new AppError("Course not found", 404);
+  } catch (error) {
+    console.error("Get course details error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching course details",
+      ...(process.env.NODE_ENV === "development" && { 
+        error: error.message 
+      }),
+    });
   }
-
-  res.status(200).json({
-    success: true,
-    data: {
-      ...course.toJSON(),
-      averageRating: course.averageRating,
-    },
-  });
-});
+};
 
 /**
  * Add lecture to course
@@ -291,50 +336,75 @@ export const addLectureToCourse = catchAsync(async (req, res) => {
 /**
  * Get course lectures
  * @route GET /api/v1/courses/:courseId/lectures
+ * Browser-safe: No throwing, all errors return JSON responses
  */
-export const getCourseLectures = catchAsync(async (req, res) => {
-  const course = await Course.findById(req.params.courseId).populate({
-    path: "lectures",
-    select: "title description videoUrl duration isPreview order",
-    options: { sort: { order: 1 } },
-  });
-
-  if (!course) {
-    throw new AppError("Course not found", 404);
-  }
-
-  // Check if user has access to full course content
-  let isEnrolled = course.enrolledStudents.some(
-    (studentId) => studentId.toString() === req.id
-  );
-
-  // Fallback: Check purchase record if not found in enrolledStudents
-  if (!isEnrolled) {
-    const purchase = await CoursePurchase.findOne({
-      user: req.id,
-      course: req.params.courseId,
-      status: 'completed'
+export const getCourseLectures = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    
+    // Validate courseId
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course ID is required"
+      });
+    }
+    
+    const course = await Course.findById(courseId).populate({
+      path: "lectures",
+      select: "title description videoUrl duration isPreview order",
+      options: { sort: { order: 1 } },
     });
-    if (purchase) isEnrolled = true;
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found"
+      });
+    }
+
+    // Check if user has access to full course content
+    let isEnrolled = course.enrolledStudents.some(
+      (studentId) => studentId.toString() === req.id
+    );
+
+    // Fallback: Check purchase record if not found in enrolledStudents
+    if (!isEnrolled) {
+      const purchase = await CoursePurchase.findOne({
+        user: req.id,
+        course: courseId,
+        status: 'completed'
+      });
+      if (purchase) isEnrolled = true;
+    }
+
+    const isInstructor = course.instructor.toString() === req.id;
+
+    let lectures = course.lectures;
+    if (!isEnrolled && !isInstructor) {
+      // Only return preview lectures for non-enrolled users
+      lectures = lectures.filter((lecture) => lecture.isPreview);
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        lectures,
+        isEnrolled,
+        isInstructor,
+      },
+    });
+  } catch (error) {
+    console.error("Get course lectures error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching course lectures",
+      ...(process.env.NODE_ENV === "development" && { 
+        error: error.message 
+      }),
+    });
   }
-
-  const isInstructor = course.instructor.toString() === req.id;
-
-  let lectures = course.lectures;
-  if (!isEnrolled && !isInstructor) {
-    // Only return preview lectures for non-enrolled users
-    lectures = lectures.filter((lecture) => lecture.isPreview);
-  }
-
-  res.status(200).json({
-    success: true,
-    data: {
-      lectures,
-      isEnrolled,
-      isInstructor,
-    },
-  });
-});
+};
 
 /**
  * Toggle course publish status

@@ -6,138 +6,188 @@ import { AppError } from "../middleware/error.middleware.js";
 /**
  * Get user's progress for a specific course
  * @route GET /api/v1/progress/:courseId
+ * Browser-safe: No throwing, all errors return JSON responses
  */
-export const getUserCourseProgress = catchAsync(async (req, res) => {
-  const { courseId } = req.params;
+export const getUserCourseProgress = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    
+    // Validate courseId
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course ID is required"
+      });
+    }
 
-  // Get course details with lectures
-  const courseDetails = await Course.findById(courseId)
-    .populate("lectures")
-    .select("courseTitle courseThumbnail lectures");
+    // Get course details with lectures
+    const courseDetails = await Course.findById(courseId)
+      .populate("lectures")
+      .select("courseTitle courseThumbnail lectures");
 
-  if (!courseDetails) {
-    throw new AppError("Course not found", 404);
-  }
+    if (!courseDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found"
+      });
+    }
 
-  // Get user's progress for the course
-  const courseProgress = await CourseProgress.findOne({
-    course: courseId,
-    user: req.id,
-  }).populate("course");
+    // Get user's progress for the course
+    const courseProgress = await CourseProgress.findOne({
+      course: courseId,
+      user: req.id,
+    }).populate("course");
 
-  // If no progress found, return course details with empty progress
-  if (!courseProgress) {
+    // If no progress found, return course details with empty progress
+    if (!courseProgress) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          courseDetails,
+          progress: [],
+          isCompleted: false,
+          completionPercentage: 0,
+        },
+      });
+    }
+
+    // Calculate completion percentage
+    const totalLectures = courseDetails.lectures.length;
+    const completedLectures = courseProgress.lectureProgress.filter(
+      (lp) => lp.isCompleted
+    ).length;
+    const completionPercentage = totalLectures > 0 
+      ? Math.round((completedLectures / totalLectures) * 100)
+      : 0;
+
+    console.log('📊 GET Progress Response:', {
+      totalLectures,
+      completedLectures,
+      completionPercentage,
+      storedPercentage: courseProgress.completionPercentage
+    });
+
     return res.status(200).json({
       success: true,
       data: {
         courseDetails,
-        progress: [],
-        isCompleted: false,
-        completionPercentage: 0,
+        progress: courseProgress.lectureProgress,
+        isCompleted: courseProgress.completed,
+        completionPercentage,
       },
     });
+  } catch (error) {
+    console.error("Get course progress error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching course progress",
+      ...(process.env.NODE_ENV === "development" && { 
+        error: error.message 
+      }),
+    });
   }
-
-  // Calculate completion percentage
-  const totalLectures = courseDetails.lectures.length;
-  const completedLectures = courseProgress.lectureProgress.filter(
-    (lp) => lp.isCompleted
-  ).length;
-  const completionPercentage = totalLectures > 0 
-    ? Math.round((completedLectures / totalLectures) * 100)
-    : 0;
-
-  console.log('📊 GET Progress Response:', {
-    totalLectures,
-    completedLectures,
-    completionPercentage,
-    storedPercentage: courseProgress.completionPercentage
-  });
-
-  res.status(200).json({
-    success: true,
-    data: {
-      courseDetails,
-      progress: courseProgress.lectureProgress,
-      isCompleted: courseProgress.completed,
-      completionPercentage,
-    },
-  });
-});
+};
 
 /**
  * Update progress for a specific lecture
  * @route PATCH /api/v1/progress/:courseId/lectures/:lectureId
+ * Browser-safe: No throwing, all errors return JSON responses
  */
-export const updateLectureProgress = catchAsync(async (req, res) => {
-  const { courseId, lectureId } = req.params;
+export const updateLectureProgress = async (req, res) => {
+  try {
+    const { courseId, lectureId } = req.params;
+    
+    // Validate parameters
+    if (!courseId || !lectureId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course ID and Lecture ID are required"
+      });
+    }
 
-  // Find or create course progress
-  let courseProgress = await CourseProgress.findOne({
-    course: courseId,
-    user: req.id,
-  });
-
-  if (!courseProgress) {
-    courseProgress = await CourseProgress.create({
-      user: req.id,
+    // Find or create course progress
+    let courseProgress = await CourseProgress.findOne({
       course: courseId,
-      isCompleted: false,
-      lectureProgress: [],
+      user: req.id,
     });
-  }
 
-  // Update lecture progress
-  const lectureIndex = courseProgress.lectureProgress.findIndex(
-    (lecture) => lecture.lecture.toString() === lectureId
-  );
+    if (!courseProgress) {
+      courseProgress = await CourseProgress.create({
+        user: req.id,
+        course: courseId,
+        isCompleted: false,
+        lectureProgress: [],
+      });
+    }
 
-  if (lectureIndex !== -1) {
-    // Toggle completion status
-    courseProgress.lectureProgress[lectureIndex].isCompleted = !courseProgress.lectureProgress[lectureIndex].isCompleted;
-  } else {
-    courseProgress.lectureProgress.push({
-      lecture: lectureId,
-      isCompleted: true,
-    });
-  }
+    // Update lecture progress
+    const lectureIndex = courseProgress.lectureProgress.findIndex(
+      (lecture) => lecture.lecture.toString() === lectureId
+    );
 
-  // Check if course is completed
-  const course = await Course.findById(courseId);
-  const completedLectures = courseProgress.lectureProgress.filter(
-    (lp) => lp.isCompleted
-  ).length;
-  
-  // Calculate accurate completion percentage based on total course lectures
-  const totalLectures = course.lectures.length;
-  const completionPercentage = totalLectures > 0 
-    ? Math.round((completedLectures / totalLectures) * 100) 
-    : 0;
-  
-  // Explicitly set these fields (don't rely on pre-save hook)
-  courseProgress.completionPercentage = completionPercentage;
-  courseProgress.isCompleted = totalLectures === completedLectures;
+    if (lectureIndex !== -1) {
+      // Toggle completion status
+      courseProgress.lectureProgress[lectureIndex].isCompleted = !courseProgress.lectureProgress[lectureIndex].isCompleted;
+    } else {
+      courseProgress.lectureProgress.push({
+        lecture: lectureId,
+        isCompleted: true,
+      });
+    }
 
-  console.log('📊 UPDATE Progress:', {
-    lectureId,
-    totalLectures,
-    completedLectures,
-    completionPercentage,
-    lectureProgressCount: courseProgress.lectureProgress.length
-  });
+    // Check if course is completed
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found"
+      });
+    }
+    
+    const completedLectures = courseProgress.lectureProgress.filter(
+      (lp) => lp.isCompleted
+    ).length;
+    
+    // Calculate accurate completion percentage based on total course lectures
+    const totalLectures = course.lectures.length;
+    const completionPercentage = totalLectures > 0 
+      ? Math.round((completedLectures / totalLectures) * 100) 
+      : 0;
+    
+    // Explicitly set these fields (don't rely on pre-save hook)
+    courseProgress.completionPercentage = completionPercentage;
+    courseProgress.isCompleted = totalLectures === completedLectures;
 
-  await courseProgress.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Lecture progress updated successfully",
-    data: {
-      lectureProgress: courseProgress.lectureProgress,
-      isCompleted: courseProgress.isCompleted,
+    console.log('📊 UPDATE Progress:', {
+      lectureId,
+      totalLectures,
+      completedLectures,
       completionPercentage,
-    },
-  });
-});
+      lectureProgressCount: courseProgress.lectureProgress.length
+    });
+
+    await courseProgress.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Lecture progress updated successfully",
+      data: {
+        lectureProgress: courseProgress.lectureProgress,
+        isCompleted: courseProgress.isCompleted,
+        completionPercentage,
+      },
+    });
+  } catch (error) {
+    console.error("Update lecture progress error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while updating lecture progress",
+      ...(process.env.NODE_ENV === "development" && { 
+        error: error.message 
+      }),
+    });
+  }
+};
 
 /**
  * Mark entire course as completed

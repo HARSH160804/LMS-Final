@@ -166,8 +166,9 @@ const ManageCourse = () => {
         const fetchCourse = async () => {
             try {
                 const response = await courseService.getCourseDetails(courseId);
-                if (response.success && response.data) {
-                    const c = response.data;
+                // Handle new API response format: { ok, status, data }
+                if (response.ok && response.data.success && response.data.data) {
+                    const c = response.data.data;
                     setCourse(c);
                     setFormData({
                         title: c.title || '',
@@ -181,7 +182,7 @@ const ManageCourse = () => {
                     });
                     if (c.thumbnail) setThumbnailPreview(c.thumbnail);
                 } else {
-                    setError('Course not found');
+                    setError(response.data?.message || 'Course not found');
                 }
             } catch (err) {
                 setError('Failed to load course');
@@ -234,13 +235,14 @@ const ManageCourse = () => {
             }
 
             const response = await courseService.updateCourse(courseId, data);
-            if (response.success) {
+            // Handle new API response format: { ok, status, data }
+            if (response.ok && response.data.success && response.data.data) {
                 setSuccess('Course updated successfully!');
-                setCourse(response.data);
+                setCourse(response.data.data);
                 setHasChanges(false);
                 setTimeout(() => setSuccess(null), 3000);
             } else {
-                setError(response.message || 'Failed to update course');
+                setError(response.data?.message || 'Failed to update course');
             }
         } catch (err) {
             setError(err.message || 'An error occurred');
@@ -252,10 +254,13 @@ const ManageCourse = () => {
     const handlePublish = async () => {
         try {
             const res = await courseService.togglePublish(courseId);
-            if (res.success) {
-                setCourse(res.data);
-                setSuccess(res.message);
+            // Handle new API response format: { ok, status, data }
+            if (res.ok && res.data.success && res.data.data) {
+                setCourse(res.data.data);
+                setSuccess(res.data.message || 'Publish status updated');
                 setTimeout(() => setSuccess(null), 3000);
+            } else {
+                setError(res.data?.message || 'Failed to update publish status');
             }
         } catch (err) {
             setError('Failed to update publish status');
@@ -266,10 +271,11 @@ const ManageCourse = () => {
         if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
             try {
                 const response = await courseService.deleteCourse(courseId);
-                if (response.success) {
+                // Handle new API response format: { ok, status, data }
+                if (response.ok && response.data.success) {
                     navigate('/instructor');
                 } else {
-                    setError(response.message || 'Failed to delete course');
+                    setError(response.data?.message || 'Failed to delete course');
                 }
             } catch (err) {
                 setError(err.message || 'Failed to delete course');

@@ -1,0 +1,78 @@
+<<<<<<< HEAD
+.env
+node_modules/
+uploads
+=======
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment variables
+.env
+backend/.env
+frontend/.env
+.env.local
+.env.production
+
+# Build outputs
+backend/dist/
+frontend/dist/
+frontend/build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Uploads
+backend/uploads/
+uploads/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.pem
+.vercel
+>>>>>>> 0f54675 (Separate backend and frontend folders for deployment)
+
+# dependencies
+node_modules
+
+# env
+.env
+
+# build outputs
+dist
+build
+.next
+
+# OS files
+.DS_Store
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+

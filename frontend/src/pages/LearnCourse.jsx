@@ -17,17 +17,19 @@ const LearnCourse = () => {
         const fetchData = async () => {
             try {
                 const courseRes = await courseService.getCourseDetails(id);
-                if (courseRes.success && courseRes.data) {
-                    setCourse(courseRes.data);
+                // Handle new API response format: { ok, status, data }
+                if (courseRes.ok && courseRes.data.success && courseRes.data.data) {
+                    setCourse(courseRes.data.data);
                 } else {
-                    setError('Failed to load course');
+                    setError(courseRes.data?.message || 'Failed to load course');
                     return;
                 }
 
                 try {
                     const lecturesRes = await courseService.getCourseLectures(id);
-                    if (lecturesRes.success && lecturesRes.data) {
-                        const lecturesList = lecturesRes.data.lectures || [];
+                    // Handle new API response format
+                    if (lecturesRes.ok && lecturesRes.data.success && lecturesRes.data.data) {
+                        const lecturesList = lecturesRes.data.data.lectures || [];
                         setLectures(lecturesList);
                         if (lecturesList.length > 0) {
                             setCurrentLecture(lecturesList[0]);
@@ -40,13 +42,14 @@ const LearnCourse = () => {
                 try {
                     const progressRes = await progressService.getCourseProgress(id);
                     console.log('🔍 Frontend received progress:', {
-                        progress: progressRes.data?.progress,
-                        completionPercentage: progressRes.data?.completionPercentage,
-                        progressLength: progressRes.data?.progress?.length
+                        progress: progressRes.data?.data?.progress,
+                        completionPercentage: progressRes.data?.data?.completionPercentage,
+                        progressLength: progressRes.data?.data?.progress?.length
                     });
-                    if (progressRes.success && progressRes.data) {
-                        setProgress(progressRes.data.progress || []);
-                        setCompletionPercentage(progressRes.data.completionPercentage || 0);
+                    // Handle new API response format
+                    if (progressRes.ok && progressRes.data.success && progressRes.data.data) {
+                        setProgress(progressRes.data.data.progress || []);
+                        setCompletionPercentage(progressRes.data.data.completionPercentage || 0);
                     }
                 } catch (e) {
                     // Progress might not exist yet
@@ -68,12 +71,13 @@ const LearnCourse = () => {
         try {
             const res = await progressService.updateLectureProgress(id, lectureId);
             
-            if (res.success && res.data) {
+            // Handle new API response format: { ok, status, data }
+            if (res.ok && res.data.success && res.data.data) {
                 // Update progress state with new data from backend
-                setProgress(res.data.lectureProgress || []);
+                setProgress(res.data.data.lectureProgress || []);
                 
                 // Use backend's calculated percentage (accurate based on total course lectures)
-                setCompletionPercentage(res.data.completionPercentage || 0);
+                setCompletionPercentage(res.data.data.completionPercentage || 0);
             }
         } catch (err) {
             console.error('Failed to update progress:', err);

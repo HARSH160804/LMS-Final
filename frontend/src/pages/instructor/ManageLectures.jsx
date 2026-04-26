@@ -116,17 +116,19 @@ const ManageLectures = () => {
         const fetchData = async () => {
             try {
                 const courseResponse = await courseService.getCourseDetails(courseId);
-                if (courseResponse.success && courseResponse.data) {
-                    setCourse(courseResponse.data);
+                // Handle new API response format: { ok, status, data }
+                if (courseResponse.ok && courseResponse.data.success && courseResponse.data.data) {
+                    setCourse(courseResponse.data.data);
                 } else {
-                    setError('Course not found');
+                    setError(courseResponse.data?.message || 'Course not found');
                     return;
                 }
 
                 try {
                     const lecturesResponse = await courseService.getCourseLectures(courseId);
-                    if (lecturesResponse.success && lecturesResponse.data) {
-                        setLectures(lecturesResponse.data.lectures || []);
+                    // Handle new API response format
+                    if (lecturesResponse.ok && lecturesResponse.data.success && lecturesResponse.data.data) {
+                        setLectures(lecturesResponse.data.data.lectures || []);
                     }
                 } catch (e) {
                     setLectures([]);
@@ -198,13 +200,14 @@ const ManageLectures = () => {
             clearInterval(progressInterval);
             setUploadProgress(100);
 
-            if (response.success) {
-                setLectures(prev => [...prev, response.data]);
+            // Handle new API response format: { ok, status, data }
+            if (response.ok && response.data.success && response.data.data) {
+                setLectures(prev => [...prev, response.data.data]);
                 clearForm();
                 setSuccess('Lecture added successfully!');
                 setTimeout(() => setSuccess(null), 3000);
             } else {
-                setError(response.message || 'Failed to add lecture');
+                setError(response.data?.message || 'Failed to add lecture');
             }
         } catch (err) {
             clearInterval(progressInterval);
