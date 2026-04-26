@@ -2,11 +2,11 @@
 
 Full-featured Learning Management System built with MERN stack, ready for AWS deployment with automated CI/CD.
 
-## 🚀 Quick Start - AWS Deployment
+##  Quick Start - AWS Deployment
 
 **Choose your deployment method:**
 
-### Option 1: Automated CI/CD (Recommended) ⭐
+### Option 1: Automated CI/CD (Recommended) 
 **Time**: 30-40 minutes | **Maintenance**: Automatic
 
 Every push to `main` automatically deploys to AWS!
@@ -30,7 +30,7 @@ Perfect for development and testing.
 docker-compose up -d
 ```
 
-## 📚 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
@@ -41,7 +41,7 @@ docker-compose up -d
 | **[AWS-DEPLOYMENT-SUMMARY.md](./AWS-DEPLOYMENT-SUMMARY.md)** | Architecture and overview |
 | **[DEPLOYMENT-README.md](./DEPLOYMENT-README.md)** | Technical reference |
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 Internet → Route 53 → EC2 (Nginx) → Docker Containers
@@ -50,33 +50,33 @@ Internet → Route 53 → EC2 (Nginx) → Docker Containers
                                     └── MongoDB
 ```
 
-## ✨ Features
+##  Features
 
 ### For Students
-- 📚 Browse and enroll in courses
-- 🎥 Watch video lectures
-- 📊 Track learning progress
-- 💳 Secure payment integration (Razorpay)
-- 👤 User profile management
+-  Browse and enroll in courses
+-  Watch video lectures
+-  Track learning progress
+-  Secure payment integration (Razorpay)
+-  User profile management
 
 ### For Instructors
-- 📝 Create and manage courses
-- 🎬 Upload video content (Cloudinary)
-- 👥 View enrolled students
-- 📈 Track course analytics
-- 💰 Revenue tracking
+- Create and manage courses
+- Upload video content (Cloudinary)
+- View enrolled students
+- Track course analytics
+- Revenue tracking
 
 ### Technical Features
-- 🔐 JWT authentication with httpOnly cookies
-- 🐳 Docker containerization
-- 🔄 Automated CI/CD with GitHub Actions
-- 🌐 Nginx reverse proxy
-- 🔒 Rate limiting and security headers
-- 📦 AWS ECR for Docker images
-- ☁️ Cloudinary for media storage
-- 💾 MongoDB for data persistence
+- JWT authentication with httpOnly cookies
+- Docker containerization
+- Automated CI/CD with GitHub Actions
+- Nginx reverse proxy
+- Rate limiting and security headers
+- AWS ECR for Docker images
+- Cloudinary for media storage
+- MongoDB for data persistence
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Frontend:**
 - React 18
@@ -100,15 +100,15 @@ Internet → Route 53 → EC2 (Nginx) → Docker Containers
 - AWS EC2
 - Nginx
 
-## 🚀 Deployment Status
+## Deployment Status
 
-✅ Production-ready  
-✅ Docker containerized  
-✅ CI/CD configured  
-✅ Security hardened  
-✅ Scalable architecture  
+- Production-ready  
+- Docker containerized  
+- CI/CD configured  
+- Security hardened  
+- Scalable architecture  
 
-## 💰 Cost Estimate
+## Cost Estimate
 
 **AWS Monthly Cost:** ~$40-50
 - EC2 t3.medium: $30-35
@@ -118,18 +118,18 @@ Internet → Route 53 → EC2 (Nginx) → Docker Containers
 
 **Free Tier Available:** First 12 months
 
-## 🔒 Security Features
+## Security Features
 
-- ✅ Non-root Docker containers
-- ✅ Security headers (X-Frame-Options, CSP, etc.)
-- ✅ Rate limiting (10 req/s API, 30 req/s general)
-- ✅ CORS configuration
-- ✅ JWT with httpOnly cookies
-- ✅ Environment variable validation
-- ✅ SSL/HTTPS ready
-- ✅ MongoDB authentication
+- Non-root Docker containers
+- Security headers (X-Frame-Options, CSP, etc.)
+- Rate limiting (10 req/s API, 30 req/s general)
+- CORS configuration
+- JWT with httpOnly cookies
+- Environment variable validation
+- SSL/HTTPS ready
+- MongoDB authentication
 
-## 📊 What's Included
+##  What's Included
 
 ### Docker Configuration
 - Multi-stage Dockerfiles (backend & frontend)
@@ -153,7 +153,7 @@ Internet → Route 53 → EC2 (Nginx) → Docker Containers
 - Health verification
 - Rollback capability
 
-## 🎯 Getting Started
+## Getting Started
 
 ### Prerequisites
 - AWS Account
@@ -247,7 +247,7 @@ Every push to `main` triggers:
 - Use MongoDB Atlas (managed)
 - Or AWS DocumentDB
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Deployment Failed
 ```bash
@@ -284,7 +284,7 @@ See `.env.example` for all required variables:
 - Razorpay credentials
 - CORS settings
 
-## ✅ Deployment Checklist
+## Deployment Checklist
 
 - [ ] AWS infrastructure setup
 - [ ] ECR repositories created
@@ -296,7 +296,7 @@ See `.env.example` for all required variables:
 - [ ] SSL configured (optional)
 - [ ] Monitoring setup (optional)
 
-## 🎉 Success Stories
+## Success Stories
 
 **Deployment Time:** 30-40 minutes  
 **Monthly Cost:** ~$40-50  
@@ -305,4 +305,4 @@ See `.env.example` for all required variables:
 
 ---
 
-**Ready to deploy?** Start with [SETUP-GUIDE-OPTION-1.md](./SETUP-GUIDE-OPTION-1.md) 🚀
+**Ready to deploy?** Start with [SETUP-GUIDE-OPTION-1.md](./SETUP-GUIDE-OPTION-1.md) 
