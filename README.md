@@ -2,33 +2,8 @@
 
 Full-featured Learning Management System built with MERN stack, ready for AWS deployment with automated CI/CD.
 
-##  Quick Start - AWS Deployment
 
-**Choose your deployment method:**
 
-### Option 1: Automated CI/CD (Recommended) 
-**Time**: 30-40 minutes | **Maintenance**: Automatic
-
-Every push to `main` automatically deploys to AWS!
-
-📖 **[Start Here: SETUP-GUIDE-OPTION-1.md](./SETUP-GUIDE-OPTION-1.md)**  
-📋 **[Track Progress: DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md)**
-
-### Option 2: Manual Deployment
-**Time**: 20 minutes | **Maintenance**: Manual
-
-Full control over deployment process.
-
-📖 **[Read Guide: AWS-DEPLOYMENT-GUIDE.md](./AWS-DEPLOYMENT-GUIDE.md)**
-
-### Option 3: Local Development
-**Time**: 5 minutes | **Maintenance**: Local only
-
-Perfect for development and testing.
-
-```bash
-docker-compose up -d
-```
 
 ## Documentation
 
