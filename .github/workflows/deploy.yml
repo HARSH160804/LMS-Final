@@ -132,7 +132,7 @@ jobs:
           
           # Copy docker-compose and nginx configs
           scp -i private_key.pem -o StrictHostKeyChecking=no \
-            docker-compose.yml \
+            docker-compose.yml docker-compose.prod.yml \
             ${USER}@${HOST}:/home/${USER}/lms/
           
           scp -i private_key.pem -o StrictHostKeyChecking=no -r \
@@ -152,16 +152,16 @@ jobs:
             docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_FRONTEND }}:latest
             
             # Stop and remove old containers
-            docker-compose down
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
             
             # Start new containers
-            docker-compose up -d
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
             
             # Clean up old images
             docker image prune -af
             
             # Show status
-            docker-compose ps
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
           EOF
           
           rm -f private_key.pem
