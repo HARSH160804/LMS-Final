@@ -1,0 +1,31 @@
+# MongoDB Configuration
+MONGO_URI=mongodb://admin:YOUR_MONGODB_PASSWORD@mongodb:27017/lms?authSource=admin
+MONGO_ROOT_USERNAME=admin
+MONGO_ROOT_PASSWORD=YOUR_MONGODB_PASSWORD
+
+# JWT Configuration
+JWT_SECRET=YOUR_JWT_SECRET_MIN_32_CHARACTERS
+JWT_EXPIRES_IN=7d
+
+# Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+
+# Razorpay Configuration
+RAZORPAY_KEY_ID=your-razorpay-key
+RAZORPAY_KEY_SECRET=your-razorpay-secret
+
+# CORS Configuration
+CLIENT_URL=http://13.233.198.183
+
+# Frontend Configuration
+VITE_BACKEND_URL=http://13.233.198.183/api/v1
+
+# AWS Configuration
+AWS_REGION=us-east-1
+
+# ECR Configuration
+ECR_REGISTRY=055392178569.dkr.ecr.us-east-1.amazonaws.com
+ECR_REPOSITORY_BACKEND=lms-backend
+ECR_REPOSITORY_FRONTEND=lms-frontend
